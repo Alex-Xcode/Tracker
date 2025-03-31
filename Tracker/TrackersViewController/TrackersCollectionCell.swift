@@ -1,15 +1,9 @@
-//
-//  TrackersCollectionViewCell.swift
-//  Tracker
-//
-//  Created by 1111 on 23.02.2025.
-//
 
 import UIKit
 
 protocol TrackersCollectionCellDelegate: AnyObject {
-    func completeTracker(id: UUID, at indexPath: IndexPath)
-    func uncompleteTracker(id: UUID, at indexPath: IndexPath)
+    func completeTracker(id: UUID)
+    func uncompleteTracker(id: UUID)
 }
 
 final class TrackersCollectionCell: UICollectionViewCell {
@@ -17,7 +11,7 @@ final class TrackersCollectionCell: UICollectionViewCell {
     
     let habitCardColorLabel: UILabel = UILabel()
     let emojiLabel: UILabel = UILabel()
-    let emojiImage: UIImageView = UIImageView()
+    let emojiBackLabel: UILabel = UILabel()
     let habitNameLabel: UILabel = UILabel()
     let addDayButton: UIButton = UIButton()
     let dayLabel: UILabel = UILabel()
@@ -26,7 +20,6 @@ final class TrackersCollectionCell: UICollectionViewCell {
     
     private var isCompletedToday: Bool = false
     private var trackerId: UUID?
-    private var indexPath: IndexPath?
     private let doneImage = UIImage(named: "Check_Tracker")
     private let plusImage: UIImage = {
         let pointSize = UIImage.SymbolConfiguration(pointSize: 11)
@@ -38,7 +31,8 @@ final class TrackersCollectionCell: UICollectionViewCell {
         super.init(frame: frame)
         
         createHabitCardColorLabel()
-        createEmojiImage()
+        createEmojiBackLabel()
+        createEmojiLabel()
         createHabitNameLabel()
         createAddDayButton()
         createDayLabel()
@@ -49,38 +43,45 @@ final class TrackersCollectionCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with tracker: Tracker, isCompletedToday: Bool, indexPath: IndexPath, completedDays: Int) {
+    func configure(with tracker: Tracker, isCompletedToday: Bool, completedDays: Int, color: UIColor) {
         self.trackerId = tracker.id
         self.isCompletedToday = isCompletedToday
-        self.indexPath = indexPath
         
-        emojiLabel.text = "❤️"
+        emojiLabel.text = tracker.emoji
         habitNameLabel.text = tracker.name
         
         let completedDaysString = "\(completedDays) день"
         dayLabel.text = completedDaysString
         
-        let backButtonColor = isCompletedToday ? UIColor(named: "33CF69_30%") : UIColor(named: "33CF69")
-        addDayButton.backgroundColor = backButtonColor
+        habitCardColorLabel.layer.backgroundColor = color.cgColor
         
         let image = isCompletedToday ? doneImage : plusImage
         addDayButton.setImage(image, for: .normal)
+        addDayButton.backgroundColor = isCompletedToday ? color.withAlphaComponent(0.3) : color
     }
     
     private func createHabitCardColorLabel() {
-        habitCardColorLabel.layer.backgroundColor = UIColor(named: "33CF69")?.cgColor
         habitCardColorLabel.layer.cornerRadius = 16
         
         habitCardColorLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(habitCardColorLabel)
     }
     
-    private func createEmojiImage() {
-        emojiImage.image = UIImage(named: "Emoji")
-        emojiImage.contentMode = .center
+    private func createEmojiBackLabel() {
+        emojiBackLabel.layer.backgroundColor = UIColor(named: "EmojiBack")?.cgColor
+        emojiBackLabel.layer.cornerRadius = 12
         
-        emojiImage.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(emojiImage)
+        emojiBackLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(emojiBackLabel)
+    }
+    
+    private func createEmojiLabel() {
+        emojiLabel.font = .systemFont(ofSize: 16)
+        emojiLabel.textAlignment = .center
+        emojiLabel.adjustsFontSizeToFitWidth = true
+        
+        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(emojiLabel)
     }
     
     private func createHabitNameLabel() {
@@ -106,13 +107,12 @@ final class TrackersCollectionCell: UICollectionViewCell {
     }
     
     @objc private func didTapAddDayButton() {
-        guard let indexPath = indexPath,
-              let trackerId = trackerId else { return }
+        guard let trackerId = trackerId else { return }
         
         if isCompletedToday {
-            delegate?.uncompleteTracker(id: trackerId, at: indexPath)
+            delegate?.uncompleteTracker(id: trackerId)
         } else {
-            delegate?.completeTracker(id: trackerId, at: indexPath)
+            delegate?.completeTracker(id: trackerId)
         }
     }
     
@@ -134,11 +134,16 @@ final class TrackersCollectionCell: UICollectionViewCell {
             habitCardColorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             habitCardColorLabel.heightAnchor.constraint(equalToConstant: 90),
             
-            emojiImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            emojiImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            emojiImage.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131),
-            emojiImage.heightAnchor.constraint(equalToConstant: 24),
-            emojiImage.widthAnchor.constraint(equalToConstant: 24),
+            emojiBackLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            emojiBackLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            emojiBackLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131),
+            emojiBackLabel.heightAnchor.constraint(equalToConstant: 24),
+            emojiBackLabel.widthAnchor.constraint(equalToConstant: 24),
+            
+            emojiLabel.topAnchor.constraint(equalTo: emojiBackLabel.topAnchor, constant: 1),
+            emojiLabel.leadingAnchor.constraint(equalTo: emojiBackLabel.leadingAnchor, constant: 4),
+            emojiLabel.trailingAnchor.constraint(equalTo: emojiBackLabel.trailingAnchor, constant: -4),
+            emojiLabel.bottomAnchor.constraint(equalTo: emojiBackLabel.bottomAnchor, constant: -1),
             
             habitNameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 44),
             habitNameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
