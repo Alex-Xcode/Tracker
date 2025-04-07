@@ -1,9 +1,17 @@
+//
+//  NewCategoryViewController.swift
+//  Tracker
+//
+//  Created by 1111 on 15.02.2025.
+//
 
 import UIKit
 
 final class NewCategoryViewController: UIViewController {
     var onAddCategoryButtonTapped: ((String) -> ())?
     
+    private let localizableStrings: LocalizableStringsNewCategoryVC = LocalizableStringsNewCategoryVC()
+    private let colorsForDarkLightTheme: ColorsForDarkLightTheme = ColorsForDarkLightTheme()
     private var viewModel: CategoriesViewModel = CategoriesViewModel()
     
     private var categoriesTable: UITableView = UITableView()
@@ -13,7 +21,7 @@ final class NewCategoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = colorsForDarkLightTheme.whiteBlackDLT
         
         setBarItem()
         createBackgroundImage()
@@ -41,8 +49,8 @@ final class NewCategoryViewController: UIViewController {
     }
     
     private func setBarItem() {
-        navigationItem.title = "Категория"
-        let attributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.medium)]
+        navigationItem.title = localizableStrings.categoryTitle
+        let attributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.medium), NSAttributedString.Key.foregroundColor: colorsForDarkLightTheme.blackWhiteDLT]
         navigationController?.navigationBar.titleTextAttributes = attributes
     }
     
@@ -55,9 +63,9 @@ final class NewCategoryViewController: UIViewController {
     }
     
     private func createBackgroundTextLabel() {
-        backgroundTextLabel.text = #"Привычки и события можно\#n объединить по смыслу"#
+        backgroundTextLabel.text = localizableStrings.placeholderTextPartOne + "\n" + localizableStrings.placeholderTextPartTwo
         backgroundTextLabel.numberOfLines = 2
-        backgroundTextLabel.textColor = .black
+        backgroundTextLabel.textColor = colorsForDarkLightTheme.blackWhiteDLT
         backgroundTextLabel.font = .systemFont(ofSize: 12, weight: UIFont.Weight.medium)
         backgroundTextLabel.textAlignment = .center
         
@@ -66,10 +74,10 @@ final class NewCategoryViewController: UIViewController {
     }
     
     private func createAddCategoryButton() {
-        addCategoryButton.backgroundColor = .black
-        addCategoryButton.setTitle("Добавить категорию", for: .normal)
+        addCategoryButton.backgroundColor = colorsForDarkLightTheme.blackWhiteDLT
+        addCategoryButton.setTitle(localizableStrings.addCategoryButtonTitle, for: .normal)
         addCategoryButton.titleLabel?.font = .systemFont(ofSize: 16, weight: UIFont.Weight.medium)
-        addCategoryButton.setTitleColor(UIColor.white, for: .normal)
+        addCategoryButton.setTitleColor(colorsForDarkLightTheme.whiteBlackDLT, for: .normal)
         addCategoryButton.layer.cornerRadius = 16
         
         addCategoryButton.translatesAutoresizingMaskIntoConstraints = false
@@ -88,7 +96,7 @@ final class NewCategoryViewController: UIViewController {
     }
     
     private func createCategoriesTable() {
-        categoriesTable.backgroundColor = UIColor.white
+        categoriesTable.backgroundColor = colorsForDarkLightTheme.whiteBlackDLT
         categoriesTable.layer.cornerRadius = 16
         categoriesTable.isScrollEnabled = false
         
@@ -155,8 +163,9 @@ extension NewCategoryViewController: UITableViewDataSource {
             cell.layer.masksToBounds = true
         }
         
-        cell.backgroundColor = UIColor(named: "E6E8EB_30%")
+        cell.backgroundColor = colorsForDarkLightTheme.backgroundAndPlaceholderBackgroundOtherVC
         cell.textLabel?.text = categoriesNames[indexPath.row]
+        cell.textLabel?.textColor = colorsForDarkLightTheme.blackWhiteDLT
         
         return cell
     }

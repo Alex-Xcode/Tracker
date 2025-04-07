@@ -1,3 +1,9 @@
+//
+//  DataProvider.swift
+//  Tracker
+//
+//  Created by 1111 on 12.03.2025.
+//
 
 import CoreData
 import UIKit

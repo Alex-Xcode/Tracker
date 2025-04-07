@@ -1,3 +1,9 @@
+//
+//  BlueOnBordingViewController.swift
+//  Tracker
+//
+//  Created by 1111 on 17.03.2025.
+//
 
 import UIKit
 
