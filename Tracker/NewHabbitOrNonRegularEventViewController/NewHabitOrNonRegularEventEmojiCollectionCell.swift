@@ -1,3 +1,10 @@
+//
+//  NewHabitEmojiCollectionCell.swift
+//  Tracker
+//
+//  Created by 1111 on 13.02.2025.
+//
+
 import UIKit
 
 final class NewHabitOrNonRegularEventEmojiCollectionCell: UICollectionViewCell {

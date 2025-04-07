@@ -1,3 +1,9 @@
+//
+//  ViewModel.swift
+//  Tracker
+//
+//  Created by 1111 on 18.03.2025.
+//
 
 import Foundation
 

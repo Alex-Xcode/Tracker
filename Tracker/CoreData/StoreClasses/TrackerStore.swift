@@ -1,3 +1,9 @@
+//
+//  TrackerStore.swift
+//  Tracker
+//
+//  Created by 1111 on 11.03.2025.
+//
 
 import CoreData
 import UIKit

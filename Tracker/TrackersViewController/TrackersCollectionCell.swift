@@ -1,3 +1,9 @@
+//
+//  TrackersCollectionViewCell.swift
+//  Tracker
+//
+//  Created by 1111 on 23.02.2025.
+//
 
 import UIKit
 
@@ -9,6 +15,8 @@ protocol TrackersCollectionCellDelegate: AnyObject {
 final class TrackersCollectionCell: UICollectionViewCell {
     static let cellIdentifier = "Cell"
     
+    let colorsForDarkLightTheme: ColorsForDarkLightTheme = ColorsForDarkLightTheme()
+    
     let habitCardColorLabel: UILabel = UILabel()
     let emojiLabel: UILabel = UILabel()
     let emojiBackLabel: UILabel = UILabel()
@@ -18,6 +26,7 @@ final class TrackersCollectionCell: UICollectionViewCell {
     
     weak var delegate: TrackersCollectionCellDelegate?
     
+    private let localizableStrings: LocalizableStringsTrackersCollectionCell = LocalizableStringsTrackersCollectionCell()
     private var isCompletedToday: Bool = false
     private var trackerId: UUID?
     private let doneImage = UIImage(named: "Check_Tracker")
@@ -50,9 +59,14 @@ final class TrackersCollectionCell: UICollectionViewCell {
         emojiLabel.text = tracker.emoji
         habitNameLabel.text = tracker.name
         
-        let completedDaysString = "\(completedDays) день"
+        if completedDays <= 1 {
+            let completedDaysString = "\(completedDays) " + localizableStrings.dayLoc
         dayLabel.text = completedDaysString
-        
+        } else {
+            let completedDaysString = "\(completedDays) " + localizableStrings.daysLoc
+            dayLabel.text = completedDaysString
+        }
+    
         habitCardColorLabel.layer.backgroundColor = color.cgColor
         
         let image = isCompletedToday ? doneImage : plusImage
@@ -96,7 +110,7 @@ final class TrackersCollectionCell: UICollectionViewCell {
     }
     
     private func createAddDayButton() {
-        addDayButton.tintColor = .white
+        addDayButton.tintColor = colorsForDarkLightTheme.whiteBlackDLT
         addDayButton.layer.cornerRadius = 17
         addDayButton.setImage(plusImage, for: .normal)
         
@@ -120,8 +134,8 @@ final class TrackersCollectionCell: UICollectionViewCell {
         dayLabel.adjustsFontSizeToFitWidth = true
         dayLabel.textAlignment = .left
         dayLabel.font = .systemFont(ofSize: 12)
-        dayLabel.textColor = .black
-        dayLabel.backgroundColor = .white
+        dayLabel.textColor = colorsForDarkLightTheme.blackWhiteDLT
+        dayLabel.backgroundColor = colorsForDarkLightTheme.whiteBlackDLT
         
         dayLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(dayLabel)

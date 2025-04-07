@@ -1,3 +1,9 @@
+//
+//  NewScheduleTableViewCell.swift
+//  Tracker
+//
+//  Created by 1111 on 20.02.2025.
+//
 
 import UIKit
 
