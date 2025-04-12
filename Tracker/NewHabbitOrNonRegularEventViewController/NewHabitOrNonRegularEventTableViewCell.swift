@@ -1,3 +1,9 @@
+//
+//  NewHabbitCell.swift
+//  Tracker
+//
+//  Created by 1111 on 11.02.2025.
+//
 
 import UIKit
 

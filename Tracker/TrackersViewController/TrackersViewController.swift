@@ -1,7 +1,15 @@
+//
+//  ViewController.swift
+//  Tracker
+//
+//  Created by 1111 on 30.01.2025.
+//
 
 import UIKit
 
 final class TrackersViewController: UIViewController {
+    private let localizableStrings: LocalizableStringsTrackersVC = LocalizableStringsTrackersVC()
+    private let colorsForDarkLightTheme: ColorsForDarkLightTheme = ColorsForDarkLightTheme()
     private let uiColorMarshalling: UIColorMarshalling = UIColorMarshalling()
     private var trackerRecordStore: TrackerRecordStore = TrackerRecordStore()
     private var trackerCategoryStore: TrackerCategoryStore = TrackerCategoryStore()
@@ -37,7 +45,7 @@ final class TrackersViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = .white
+        self.view.backgroundColor = colorsForDarkLightTheme.whiteBlackDLT
         
         setNaviBar()
         createTitleLabel()
@@ -46,6 +54,8 @@ final class TrackersViewController: UIViewController {
         createBackgroundTextLabel()
         createTrackersCollectionView()
         setConstraints()
+        
+        searchTextField.delegate = self
         
         trackerRecordStore.delegate = self
         completedTrackers = trackerRecordStore.completedTrackers
@@ -68,23 +78,63 @@ final class TrackersViewController: UIViewController {
             style: .plain,
             target: self,
             action: #selector(didTapAddButton))
-        leftButton.tintColor = .black
+        leftButton.tintColor = colorsForDarkLightTheme.blackWhiteDLT
         navigationItem.setLeftBarButton(leftButton, animated: false)
     }
     
     @objc private func didChangeDate() {
+//        let calendar = Calendar.current
+//        let filterWeekday = calendar.component(.weekday, from: datePicker.date)
+//        
+//        visibleCategories = categories.compactMap { category in
+//            let trackersWithSchedule = category.trackers.filter { tracker in
+//                tracker.schedule.contains { weekDay in
+//                    weekDay == filterWeekday
+//                }
+//            }
+//            
+//            let trackersWithNoSchedule = category.trackers.filter { tracker in
+//                tracker.schedule.isEmpty
+//            }
+//            
+//            let trackers = trackersWithSchedule + trackersWithNoSchedule
+//            
+//            if trackers.isEmpty {
+//                return nil
+//            }
+//            
+//            return TrackerCategory(name: category.name, trackers: trackers)
+//        }
+//        
+//        let isEmpty = visibleCategories.allSatisfy { $0.trackers.isEmpty }
+//        trackersCollectionView.isHidden = isEmpty
+//        backgroundImage.isHidden = !isEmpty
+//        backgroundTextLabel.isHidden = !isEmpty
+//        
+//        trackersCollectionView.reloadData()
+        reloadVisibleCategories()
+    }
+    
+    private func reloadVisibleCategories() {
         let calendar = Calendar.current
         let filterWeekday = calendar.component(.weekday, from: datePicker.date)
+        let filterText = (searchTextField.text ?? "").lowercased()
         
         visibleCategories = categories.compactMap { category in
             let trackersWithSchedule = category.trackers.filter { tracker in
-                tracker.schedule.contains { weekDay in
+                let textCondition = filterText.isEmpty || tracker.name.lowercased().contains(filterText)
+                let dateCondition = tracker.schedule.contains { weekDay in
                     weekDay == filterWeekday
                 }
+                
+                return textCondition && dateCondition
             }
             
             let trackersWithNoSchedule = category.trackers.filter { tracker in
-                tracker.schedule.isEmpty
+                let textCondition = filterText.isEmpty || tracker.name.lowercased().contains(filterText)
+                let dateCondition = tracker.schedule.isEmpty
+                
+                return textCondition && dateCondition
             }
             
             let trackers = trackersWithSchedule + trackersWithNoSchedule
@@ -116,8 +166,8 @@ final class TrackersViewController: UIViewController {
     //MARK: Creating elements on screen
     
     private func createTitleLabel() {
-        titleLabel.text = "Трекеры"
-        titleLabel.textColor = .black
+        titleLabel.text = localizableStrings.title
+        titleLabel.textColor = colorsForDarkLightTheme.blackWhiteDLT
         titleLabel.font = .systemFont(ofSize: 34, weight: UIFont.Weight.bold)
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -132,8 +182,8 @@ final class TrackersViewController: UIViewController {
     }
     
     private func createBackgroundTextLabel() {
-        backgroundTextLabel.text = "Что будем отслеживать?"
-        backgroundTextLabel.textColor = .black
+        backgroundTextLabel.text = localizableStrings.placeholderTitle
+        backgroundTextLabel.textColor = colorsForDarkLightTheme.blackWhiteDLT
         backgroundTextLabel.font = .systemFont(ofSize: 12, weight: UIFont.Weight.medium)
         
         backgroundTextLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -141,10 +191,10 @@ final class TrackersViewController: UIViewController {
     }
     
     private func createSearchTextField() {
-        searchTextField.backgroundColor = .lightText
-        searchTextField.textColor = .black
+        searchTextField.backgroundColor = colorsForDarkLightTheme.backgroundColorSearchTextFieldTrackVC
+        searchTextField.textColor = colorsForDarkLightTheme.blackWhiteDLT
         searchTextField.font = UIFont.systemFont(ofSize: 17)
-        searchTextField.placeholder = "Поиск"
+        searchTextField.attributedPlaceholder = NSAttributedString(string: localizableStrings.searchTextFiledPlaceholderText, attributes: [NSAttributedString.Key.foregroundColor: colorsForDarkLightTheme.placeholderSearchTextFieldTextColorTrackVC ?? UIColor()])
         
         searchTextField.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(searchTextField)
@@ -194,16 +244,27 @@ final class TrackersViewController: UIViewController {
         
         convertSavedDaysToNumbersOfWeekend(savedDays)
         
-        let tracker = Tracker(id: UUID(), name: savedHabitName, color: uiColorMarshalling.hexString(from: savedColor), emoji: savedEmoji, schedule: savedDayNumberOfWeekend)
-        dataProvider.addTracker(categoryName: savedCategoryName, tracker: tracker)
+        let tracker = Tracker(
+            id: UUID(),
+            name: savedHabitName,
+            color: uiColorMarshalling.hexString(from: savedColor),
+            emoji: savedEmoji,
+            schedule: savedDayNumberOfWeekend
+        )
         
+        dataProvider.addTracker(categoryName: savedCategoryName, tracker: tracker)
         didChangeDate()
     }
     
     private func convertSavedDaysToNumbersOfWeekend(_ savedDays: [String]) {
         let dayNumbers: [String: Int] = [
-            "Понедельник": 2, "Вторник": 3, "Среда": 4,
-            "Четверг": 5, "Пятница": 6, "Суббота": 7, "Воскресенье": 1
+            localizableStrings.mondayLoc: 2,
+            localizableStrings.tuesdayLoc: 3,
+            localizableStrings.wednesdayLoc: 4,
+            localizableStrings.thursdayLoc: 5,
+            localizableStrings.fridayLoc: 6,
+            localizableStrings.saturdayLoc: 7,
+            localizableStrings.sundayLoc: 1
         ]
         
         savedDayNumberOfWeekend = savedDays.compactMap { dayNumbers[$0] }
@@ -305,7 +366,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
-//MARK: Delegate Protocol
+//MARK: Collection Delegate Protocol
 
 extension TrackersViewController: TrackersCollectionCellDelegate {
     func completeTracker(id: UUID) {
@@ -335,6 +396,16 @@ extension TrackersViewController: TrackersCollectionCellDelegate {
         } else {
             print("Cant remove day")
         }
+    }
+}
+
+//MARK: TextField Delegate Protocol
+
+extension TrackersViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        reloadVisibleCategories()
+        return true
     }
 }
 
